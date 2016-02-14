@@ -1,0 +1,156 @@
+/* Cette fonction permet de lire un fichier passé en paramètre, et d'en retourner une ligne sous forme de char *. Un nouvel appel
+à la fonction retourne la ligne suivante, et ainsi de suite, jusqu'a la fin du fichier, ou NULL est retourné.
+Une contraite existe : Dans le fichier get_next_line.h, la valeur de READ_SIZE (par défaut, elle est de 14), qui est le nombre de caractères
+lus a chaque appel de la fonction read. Changer le READ_SIZE n'affecte en rien les capacités du programme, qui
+se contentera de faire plusieurs appels a read, ou de stocker les valeurs lues en trop pour un futur usage.
+
+Le fichier n'est pas fonctionnel tel quel, il ne s'agit que d'une fonction, dont le prototype est :
+char *get_next_line(int fd);
+fd étant le file descriptor du fichier a lire. */
+
+----------------------FICHIER "get_next_line.c"--------------------
+
+#include        <stdlib.h> 
+#include        <fcntl.h> 
+#include        <unistd.h> 
+#include        "get_next_line.h" 
+ 
+int             mylen(char *str) 
+{ 
+  int           j; 
+  int           k; 
+  int           l; 
+ 
+  l = 2; 
+  k = 2; 
+  j = 0; 
+  while (str[j] != 0) 
+    { 
+      l = l + 1; 
+      k = k + 1; 
+      j = j + 1; 
+    } 
+  j = j + k - l; 
+  return (j); 
+} 
+ 
+char            **my_stridup(char *str, int j) 
+{ 
+  char          *str2[2]; 
+  int           k; 
+ 
+  if (j > -1 && str[j] == 0) 
+    { 
+      return (NULL); 
+    } 
+  else if ((str2[0] = malloc(sizeof(char) * (mylen(str) + 1))) == NULL) 
+    { 
+      return (NULL); 
+    } 
+  k = -1; 
+  while (str[++j] != 0) 
+    { 
+      k = k + 1; 
+      str2[0][k] = str[j]; 
+    } 
+  str2[0][k + 1] = '\0'; 
+  k = 0; 
+  return (str2[0]); 
+} 
+ 
+char            *init(char *rest, char **buff) 
+{ 
+  char          *ret; 
+  int           j; 
+ 
+  if (rest != NULL) 
+    { 
+      if ((ret = my_stridup(rest, -1)) == NULL) 
+        return (NULL); 
+    } 
+  else 
+    { 
+      if ((ret = malloc(sizeof(char) * 2)) == NULL) 
+        { 
+          return (NULL); 
+        } 
+      ret[0] = 0; 
+    } 
+      if ((*buff = malloc(sizeof(char) * (READ_SIZE + 1))) == NULL) 
+    return (NULL); 
+  j = 0; 
+  while (j < READ_SIZE + 1) 
+    { 
+      (*buff)[j] = 0; 
+      j = j + 1; 
+    } 
+  return (ret); 
+} 
+ 
+char            *get_next_line(const int fd) 
+{ 
+  static char   *rest; 
+  int           t; 
+  char          *buff; 
+  char          *ret; 
+  int           r; 
+ 
+  if ((ret = init(rest, &buff)) == NULL) 
+    return (NULL); 
+  if (rest != NULL) 
+    free(rest); 
+  t = 0; 
+  while (t == 0 && (r = read(fd, buff, READ_SIZE)) > 0 && ret != NULL) 
+    if ((ret = return_line(&buff, ret, &t)) == NULL) 
+      return (NULL); 
+  if (r == 0 && fd != 0) 
+    ret[mylen(ret) - 1] = 0; 
+  if (r == 0 && ret[0] == 0) 
+    return (NULL); 
+  t = -1; 
+  while (buff[++t] != 0 && buff[t] != '\n'); 
+  if (buff[t] == 10) 
+    rest = my_stridup(buff, t); 
+  if (buff != NULL) 
+    free(buff); 
+  return (ret); 
+} 
+ 
+char            *return_line(char **buff, char *rest, int *t) 
+{ 
+  char          *tmp; 
+  int           i; 
+  int           j; 
+ 
+  if ((tmp = malloc(sizeof(char) * (mylen(rest) + mylen(*buff) + 1))) == NULL) 
+    return (NULL); 
+  i = 0; 
+  j = -1; 
+  while (rest[i] != 0) 
+    { 
+      tmp[i] = rest[i]; 
+      i = i + 1; 
+    } 
+  i = i - 1; 
+  while ((*buff)[++j] != '\n' && (*buff)[j] != 0) 
+    tmp[++i] = (*buff)[j]; 
+  tmp[i + 1] = 0; 
+  if ((*buff)[j] == '\n') 
+    *t = 1; 
+  j = -1; 
+  while (t == 0 && ++j < READ_SIZE + 1) 
+    (*buff)[j] = 0; 
+  free(rest);
+  return (tmp);
+}
+
+-----------------------------FICHIER "get_next_line.h"---------------------
+
+#ifndef GET_NEXT_LINE_H_
+# define GET_NEXT_LINE_H_
+
+# ifndef READ_SIZE
+#  define READ_SIZE (14)
+# endif
+
+#endif
