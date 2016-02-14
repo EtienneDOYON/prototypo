@@ -1,0 +1,10 @@
+/* Ce dossier comprends les fichiers qui sont utilisés, dans le language C, pour créer un "minitalk". Ce programme permet
+à deux terminaux de communiquer entre eux.
+Pour compiler, executer la commande "make", qui appelera le fichier "Makefile".
+Deux executables seront ensuite disponibles, un dans le fichier 'client', et un dans le fichier 'server'.
+Executer le serveur avec la commande ./server (une fois dans le fichier server) permet d'obtenir un PID, une adresse
+de programme.
+Executer ensuite le client (une fois dans le dossier client) en utilisant ./client PID message.
+Le PID a rentrer est celui obtenu précédemment. Le message est une chaine de caractères.
+Le programme va envoyer ce message sous formes de signaux au server, qui affichera alors le message.
+Les seuls signaux utilisés sont SIGUSR1 et SIGUSR2. */
